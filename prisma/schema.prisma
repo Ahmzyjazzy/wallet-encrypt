@@ -12,13 +12,16 @@ datasource db {
 
 model Customer {
   id          String        @id @default(uuid())
-  name        String
+  username    String        @unique @db.VarChar(50)
+  name        String        @db.VarChar(191)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   balance     Balance?
   wallets     Wallet[]
   transaction Transaction[]
   LedgerEntry LedgerEntry?
+
+  @@map("customers")
 }
 
 model Wallet {
@@ -30,6 +33,8 @@ model Wallet {
   customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
   transactions Transaction[]
   ledgerEntry  LedgerEntry[]
+
+  @@map("wallets")
 }
 
 model Balance {
@@ -41,6 +46,8 @@ model Balance {
   updatedAt  DateTime @updatedAt
   wallet     Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
   customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("wallet_balances")
 }
 
 model Transaction {
@@ -56,6 +63,8 @@ model Transaction {
   customer      Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
   wallet        Wallet       @relation(fields: [walletId], references: [id])
   LedgerEntry   LedgerEntry?
+
+  @@map("transactions")
 }
 
 model LedgerEntry {
@@ -70,4 +79,6 @@ model LedgerEntry {
   transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
   wallet        Wallet      @relation(fields: [walletId], references: [id])
   customer      Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("ledger_entries")
 }

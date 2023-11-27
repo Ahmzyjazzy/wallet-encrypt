@@ -5,10 +5,12 @@ import { Test } from '@nestjs/testing'
 import * as pactum from 'pactum'
 import { AppModule } from '../src/app.module'
 import { PrismaService } from '../src/prisma/prisma.service'
+import { Customer } from '@prisma/client'
 
 describe('App e2e', () => {
   let app: INestApplication
   let prisma: PrismaService
+  let validCustomerId: string
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -33,11 +35,51 @@ describe('App e2e', () => {
     app.close()
   })
 
+
+  describe('Customer', () => {
+
+    it('should throw if no body param supplied', () => {
+      return pactum
+        .spec()
+        .post(`/customer`)
+        .expectStatus(400)
+    })
+
+    it('should create customer', async () => {
+      const response = await pactum
+        .spec()
+        .post('/customer')
+        .withBody({
+          name: "Ahmed Olanrewaju",
+          username: "Ahmzyjazzy"
+        })
+        .expectStatus(201)
+        .expectBodyContains('customerId')
+        .expectBodyContains('customerName')
+        .expectBodyContains('wallets')
+
+      validCustomerId = response.json.customerId;
+      return response
+    })
+
+    it('should throw if customer already exists', async () => {
+      return await pactum
+        .spec()
+        .post('/customer')
+        .withBody({
+          name: "Ahmed Olanrewaju",
+          username: "Ahmzyjazzy"
+        })
+        .expectStatus(403)
+    })
+
+  })
+
   describe('Balance', () => {
 
     describe('Multiple Wallet Balance', () => {
 
-      it('should throw if no customer balances does not exist', () => {
+      it('should throw if customer balances does not exist', () => {
         const fakeCustomerId = '92929292'
         return pactum
           .spec()
@@ -46,11 +88,11 @@ describe('App e2e', () => {
       })
 
       it('should retrieve customer wallet balances', () => {
-        const validCustomerId = '92929292'
         return pactum
           .spec()
           .get(`/balance/${validCustomerId}`)
           .expectStatus(200)
+        .inspect()
       })
 
     })
