@@ -10,3 +10,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Customer {
+  id           Int      @id @default(autoincrement())
+  customerName String
+  wallets      Wallet[]
+}
+
+model Wallet {
+  id           Int           @id @default(autoincrement())
+  customerId   Int
+  balances     Balance[]
+  transactions Transaction[]
+  Customer     Customer      @relation(fields: [customerId], references: [id])
+}
+
+model Balance {
+  id            Int           @id @default(autoincrement())
+  walletId      Int
+  amount        String
+  Wallet        Wallet        @relation(fields: [walletId], references: [id])
+  ledgerEntries LedgerEntry[]
+}
+
+model Transaction {
+  id            Int      @id @default(autoincrement())
+  walletId      Int
+  type          String // 'deposit' or 'withdrawal'
+  amount        String
+  description   String
+  depositSource String? // The source of the deposit transaction :via debitcard or transfer
+  createdAt     DateTime @default(now())
+  Wallet        Wallet   @relation(fields: [walletId], references: [id])
+}
+
+model LedgerEntry {
+  id            Int      @id @default(autoincrement())
+  balanceId     Int
+  transactionId Int
+  balanceBefore String
+  balanceAfter  String
+  createdAt     DateTime @default(now())
+  Balance       Balance  @relation(fields: [balanceId], references: [id])
+}
