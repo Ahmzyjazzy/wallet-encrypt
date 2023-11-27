@@ -4,9 +4,11 @@ import * as crypto from 'crypto'
 @Injectable()
 export class EncryptionService {
     // process.env.ENCRYPTION_KEY = process.env.crypto.randomBytes(32).toString('hex')
+    // process.env.IV_KEY = crypto.randomBytes(16).toString('hex')
+    
     private key = Buffer.from(process.env.ENCRYPTION_KEY, 'hex')
     private algorithm = 'aes-256-cbc'
-    private iv = Buffer.from(process.env.IV_KEY, 'hex') //crypto.randomBytes(16)
+    private iv = Buffer.from(process.env.IV_KEY, 'hex')
 
     encrypt(text: string): string {
         const cipher = crypto.createCipheriv(this.algorithm, this.key, this.iv)
