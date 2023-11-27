@@ -11,44 +11,63 @@ datasource db {
 }
 
 model Customer {
-  id           Int      @id @default(autoincrement())
-  customerName String
-  wallets      Wallet[]
+  id          String        @id @default(uuid())
+  name        String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  balance     Balance?
+  wallets     Wallet[]
+  transaction Transaction[]
+  LedgerEntry LedgerEntry?
 }
 
 model Wallet {
-  id           Int           @id @default(autoincrement())
-  customerId   Int
-  balances     Balance[]
+  id           String        @id @default(uuid())
+  customerId   String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  balance      Balance?
+  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
   transactions Transaction[]
-  Customer     Customer      @relation(fields: [customerId], references: [id])
+  ledgerEntry  LedgerEntry[]
 }
 
 model Balance {
-  id            Int           @id @default(autoincrement())
-  walletId      Int
-  amount        String
-  Wallet        Wallet        @relation(fields: [walletId], references: [id])
-  ledgerEntries LedgerEntry[]
+  id         Int      @id @default(autoincrement())
+  customerId String   @unique
+  walletId   String   @unique
+  amount     String // store encrypted value
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  wallet     Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
 model Transaction {
-  id            Int      @id @default(autoincrement())
-  walletId      Int
-  type          String // 'deposit' or 'withdrawal'
-  amount        String
+  id            Int          @id @default(autoincrement())
+  customerId    String
+  walletId      String
+  type          String       @db.VarChar(50) // 'deposit' or 'withdrawal'
+  amount        String // store encrypted value
   description   String
-  depositSource String? // The source of the deposit transaction :via debitcard or transfer
-  createdAt     DateTime @default(now())
-  Wallet        Wallet   @relation(fields: [walletId], references: [id])
+  depositSource String?      @db.VarChar(50) // The source of the deposit transaction :via debitcard or transfer
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  customer      Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  wallet        Wallet       @relation(fields: [walletId], references: [id])
+  LedgerEntry   LedgerEntry?
 }
 
 model LedgerEntry {
-  id            Int      @id @default(autoincrement())
-  balanceId     Int
-  transactionId Int
-  balanceBefore String
-  balanceAfter  String
-  createdAt     DateTime @default(now())
-  Balance       Balance  @relation(fields: [balanceId], references: [id])
+  id            Int         @id @default(autoincrement())
+  customerId    String      @unique
+  walletId      String
+  transactionId Int         @unique
+  balanceBefore String      @db.VarChar(50)
+  balanceAfter  String      @db.VarChar(50)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  wallet        Wallet      @relation(fields: [walletId], references: [id])
+  customer      Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }

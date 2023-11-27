@@ -34,7 +34,48 @@ describe('App e2e', () => {
   })
 
   describe('Balance', () => {
-    
-    it.todo('shout get customer balance')
+
+    describe('Multiple Wallet Balance', () => {
+
+      it('should throw if no customer balances does not exist', () => {
+        const fakeCustomerId = '92929292'
+        return pactum
+          .spec()
+          .get(`/balance/${fakeCustomerId}`)
+          .expectStatus(403)
+      })
+
+      it('should retrieve customer wallet balances', () => {
+        const validCustomerId = '92929292'
+        return pactum
+          .spec()
+          .get(`/balance/${validCustomerId}`)
+          .expectStatus(200)
+      })
+
+    })
+
+    describe('Single Wallet Balance', () => {
+
+      it('should throw if customer balance does not exist', () => {
+        const fakeCustomerId = '92929292'
+        const fakeWalletId = '92929292'
+        return pactum
+          .spec()
+          .get(`/balance/${fakeCustomerId}/wallet/${fakeWalletId}`)
+          .expectStatus(403)
+      })
+
+      it('should retrieve customer wallet balance', () => {
+        const customerId = '92929292'
+        const walletId = '92929292'
+        return pactum
+          .spec()
+          .get(`/balance/${customerId}/wallet/${walletId}`)
+          .expectStatus(200)
+      })
+    })
+
   })
+
 })
