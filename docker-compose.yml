@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  dev-db:
+   image: postgres:13
+   ports:
+     - 5434:5432
+   environment:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: 123
+    POSTGRES_DB: walletbalance
+   networks:
+    - walletbalance-network
+  test-db:
+   image: postgres:13
+   ports:
+     - 5465:5432
+   environment:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: 123
+    POSTGRES_DB: walletbalance
+   networks:
+    - walletbalance-network
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+networks:
+  walletbalance-network:
