@@ -1,3 +1,14 @@
+# Wallet Encrypt
+
+An end to end proof of concept showing how to use encryption at rest for transaction amount and customer balance in a digital wallet application.
+
+# Tech Stack
+- Nodejs
+- Nestjs
+- Typescript
+- Prisma
+- Pactum
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
