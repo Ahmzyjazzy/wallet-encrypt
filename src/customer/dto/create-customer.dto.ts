@@ -1,5 +1,5 @@
 import {
-    IsEmail, IsNotEmpty, IsString
+    IsNotEmpty, IsString
 } from "class-validator"
 
 export class CreateCustomerDto {

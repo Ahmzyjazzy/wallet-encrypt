@@ -1,4 +1,3 @@
-// src/customer/customer.service.ts
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EncryptionService } from '../encryption/encryption.service'
 import { PrismaService } from '../prisma/prisma.service'
@@ -77,23 +76,4 @@ export class CustomerService {
         });
     }
 
-    async getWallets(customerId: string): Promise<{ walletId: string, customerId: string, customerName: string }[]> {
-        const wallets = await this.prisma.wallet.findMany({
-            where: {
-                customerId,
-            },
-            include: {
-                customer: true,
-                balance: true
-            }
-        });
-
-        return wallets.map(({ id: walletId, customer }) => {
-            return {
-                walletId,
-                customerId: customer.id,
-                customerName: customer.name
-            }
-        })
-    }
 }

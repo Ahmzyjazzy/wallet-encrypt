@@ -19,7 +19,7 @@ model Customer {
   balance     Balance?
   wallets     Wallet[]
   transaction Transaction[]
-  LedgerEntry LedgerEntry?
+  LedgerEntry LedgerEntry[]
 
   @@map("customers")
 }
@@ -69,7 +69,7 @@ model Transaction {
 
 model LedgerEntry {
   id            Int         @id @default(autoincrement())
-  customerId    String      @unique
+  customerId    String
   walletId      String
   transactionId Int         @unique
   balanceBefore String      @db.VarChar(50)

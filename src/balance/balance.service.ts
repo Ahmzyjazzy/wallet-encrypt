@@ -25,15 +25,15 @@ export class BalanceService {
 
     async getWalletBalance(customerId: string, walletId: string) {
         const balance = await this.prisma.balance.findFirst({
-            where: { customerId, walletId },
+            where: { customerId, walletId }
         });
 
         if (!balance) throw new ForbiddenException()
 
         return balance ?
             {
-                id: balance.id,
-                amount: this.encryptionService.decrypt(balance.amount),
+                walletId: balance.walletId,
+                amount: parseInt(this.encryptionService.decrypt(balance.amount)),
             } : balance
     }
 

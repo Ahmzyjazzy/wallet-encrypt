@@ -11,6 +11,7 @@ describe('App e2e', () => {
   let app: INestApplication
   let prisma: PrismaService
   let validCustomerId: string
+  let validWalletId: string
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -59,6 +60,7 @@ describe('App e2e', () => {
         .expectBodyContains('wallets')
 
       validCustomerId = response.json.customerId;
+      validWalletId = response.json.wallets[0].walletId
       return response
     })
 
@@ -92,6 +94,7 @@ describe('App e2e', () => {
           .spec()
           .get(`/balance/${validCustomerId}`)
           .expectStatus(200)
+          .expectBodyContains('amount')
         .inspect()
       })
 
@@ -99,21 +102,26 @@ describe('App e2e', () => {
 
     describe('Single Wallet Balance', () => {
 
-      it('should throw if customer balance does not exist', () => {
-        const fakeCustomerId = '92929292'
+      it('should throw if wallet does not', () => {
         const fakeWalletId = '92929292'
         return pactum
           .spec()
-          .get(`/balance/${fakeCustomerId}/wallet/${fakeWalletId}`)
+          .get(`/balance/${validCustomerId}/wallet/${fakeWalletId}`)
+          .expectStatus(403)
+      })
+
+      it('should throw if customer does not', () => {
+        const fakeCustomerId = '92929292'
+        return pactum
+          .spec()
+          .get(`/balance/${fakeCustomerId}/wallet/${validWalletId}`)
           .expectStatus(403)
       })
 
       it('should retrieve customer wallet balance', () => {
-        const customerId = '92929292'
-        const walletId = '92929292'
         return pactum
           .spec()
-          .get(`/balance/${customerId}/wallet/${walletId}`)
+          .get(`/balance/${validCustomerId}/wallet/${validWalletId}`)
           .expectStatus(200)
       })
     })
