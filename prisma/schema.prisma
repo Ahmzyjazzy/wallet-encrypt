@@ -16,7 +16,6 @@ model Customer {
   name        String        @db.VarChar(191)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  balance     Balance?
   wallets     Wallet[]
   transaction Transaction[]
   LedgerEntry LedgerEntry[]
@@ -29,25 +28,12 @@ model Wallet {
   customerId   String
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  balance      Balance?
+  balance      String // store encrypted value
   customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
   transactions Transaction[]
   ledgerEntry  LedgerEntry[]
 
   @@map("wallets")
-}
-
-model Balance {
-  id         Int      @id @default(autoincrement())
-  customerId String   @unique
-  walletId   String   @unique
-  amount     String // store encrypted value
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  wallet     Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-
-  @@map("wallet_balances")
 }
 
 model Transaction {

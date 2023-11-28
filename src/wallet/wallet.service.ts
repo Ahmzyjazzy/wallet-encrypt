@@ -1,7 +1,7 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { WalletDepositDto, WalletWithdrawalDto } from './dto';
-import { PrismaService } from '../prisma/prisma.service';
-import { EncryptionService } from '../encryption/encryption.service';
+import { ForbiddenException, Injectable } from '@nestjs/common'
+import { WalletDepositDto, WalletWithdrawalDto } from './dto'
+import { PrismaService } from '../prisma/prisma.service'
+import { EncryptionService } from '../encryption/encryption.service'
 
 @Injectable()
 export class WalletService {
@@ -25,7 +25,7 @@ export class WalletService {
          */
 
         return await this
-            .updateWalletBalance(walletId, walletDeposit.amount, 'deposit', 'deposit description');
+            .updateWalletBalance(walletId, walletDeposit.amount, 'deposit', 'deposit description')
     }
 
     async handleWalletWithdrawal(walletId: string, walletWithdrawal: WalletWithdrawalDto) {
@@ -46,11 +46,11 @@ export class WalletService {
          */
 
         return await this
-            .updateWalletBalance(walletId, walletWithdrawal.amount, 'withdrawal', 'withdrawal description');
+            .updateWalletBalance(walletId, walletWithdrawal.amount, 'withdrawal', 'withdrawal description')
     }
 
     async updateWalletBalance(walletId: string, amount: number, type: 'deposit' | 'withdrawal', description: string) {
-        const encryptedAmount = this.encryptionService.encrypt(amount.toString());
+        const encryptedAmount = this.encryptionService.encrypt(amount.toString())
 
         // Use Prisma transaction with 'serializable' isolation level
         return this.prisma.$transaction(async (prismaTransaction) => {
@@ -72,71 +72,65 @@ export class WalletService {
                     description, //! You can use a custom txn description generation service
                     amount: encryptedAmount
                 },
-            });
+            })
 
             // Get the current balance
-            const currentBalance = await prismaTransaction.balance.findFirst({
-                where: { walletId },
-                orderBy: { id: 'desc' },
-            });
-
-            const balanceBefore = currentBalance ? this.encryptionService.decrypt(currentBalance.amount) : '0';
+            const currentBalance = wallet.balance
+            const balanceBefore = currentBalance ? this.encryptionService.decrypt(currentBalance) : '0'
 
             const balanceAfter = type === 'deposit'
                 ? this.encryptionService.encrypt((+balanceBefore + amount).toString())
-                : this.encryptionService.encrypt((+balanceBefore - amount).toString());
+                : this.encryptionService.encrypt((+balanceBefore - amount).toString())
 
             // Update the balance
-            await prismaTransaction.balance.update({
+            await prismaTransaction.wallet.update({
                 where: {
-                    walletId,
+                    id: walletId,
                     customerId,
                 },
                 data: {
                     customerId,
-                    walletId,
-                    amount: encryptedAmount
+                    balance: encryptedAmount
                 }
-            });
+            })
 
             // Create a ledger entry
+            const encryptedBalanceBefore = this.encryptionService.encrypt(balanceBefore.toString())
             await prismaTransaction.ledgerEntry.create({
                 data: {
                     customerId,
                     walletId,
                     transactionId: transaction.id,
-                    balanceBefore,
+                    balanceBefore: encryptedBalanceBefore,
                     balanceAfter,
                 },
-            });
+            })
         })
     }
 
     async getAllWalletBalances(customerId: string) {
-        const walletBalances = await this.prisma.balance.findMany({
+        const wallets = await this.prisma.wallet.findMany({
             where: { customerId }
-        });
+        })
 
-        if (walletBalances.length === 0) throw new ForbiddenException()
+        if (wallets.length === 0) throw new ForbiddenException()
 
-        return walletBalances.map(balance => ({
-            id: balance.id,
-            walletId: balance.walletId,
-            amount: this.encryptionService.decrypt(balance.amount),
-        }));
+        return wallets.map(wallet => ({
+            walletId: wallet.id,
+            amount: this.encryptionService.decrypt(wallet.balance),
+        }))
     }
 
     async getSingleWalletBalance(customerId: string, walletId: string) {
-        const balance = await this.prisma.balance.findFirst({
-            where: { customerId, walletId }
-        });
+        const wallet = await this.prisma.wallet.findFirst({
+            where: { id: walletId, customerId }
+        })
 
-        if (!balance) throw new ForbiddenException()
+        if (!wallet) throw new ForbiddenException()
 
-        return balance ?
-            {
-                walletId: balance.walletId,
-                amount: parseInt(this.encryptionService.decrypt(balance.amount)),
-            } : balance
+        return {
+            walletId: wallet.id,
+            amount: parseInt(this.encryptionService.decrypt(wallet.balance)),
+        }
     }
 }
