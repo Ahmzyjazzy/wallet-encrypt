@@ -3,9 +3,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
-import { BalanceModule } from './balance/balance.module';
 import { EncryptionModule } from './encryption/encryption.module';
 import { CustomerModule } from './customer/customer.module';
+import { WalletModule } from './wallet/wallet.module';
 
 @Module({
   imports: [
@@ -13,9 +13,9 @@ import { CustomerModule } from './customer/customer.module';
       isGlobal: true
     }),
     PrismaModule,
-    BalanceModule,
     EncryptionModule,
     CustomerModule,
+    WalletModule,
   ],
   controllers: [AppController],
   providers: [AppService],

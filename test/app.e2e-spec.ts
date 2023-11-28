@@ -77,22 +77,22 @@ describe('App e2e', () => {
 
   })
 
-  describe('Balance', () => {
+  describe('Wallets', () => {
 
-    describe('Multiple Wallet Balance', () => {
+    describe('Multiple Wallet Balances', () => {
 
       it('should throw if customer balances does not exist', () => {
         const fakeCustomerId = '92929292'
         return pactum
           .spec()
-          .get(`/balance/${fakeCustomerId}`)
+          .get(`/wallet/balance/${fakeCustomerId}`)
           .expectStatus(403)
       })
 
       it('should retrieve customer wallet balances', () => {
         return pactum
           .spec()
-          .get(`/balance/${validCustomerId}`)
+          .get(`/wallet/balance/${validCustomerId}`)
           .expectStatus(200)
           .expectBodyContains('amount')
         .inspect()
@@ -106,7 +106,7 @@ describe('App e2e', () => {
         const fakeWalletId = '92929292'
         return pactum
           .spec()
-          .get(`/balance/${validCustomerId}/wallet/${fakeWalletId}`)
+          .get(`/wallet/balance/${validCustomerId}/wallet/${fakeWalletId}`)
           .expectStatus(403)
       })
 
@@ -114,18 +114,29 @@ describe('App e2e', () => {
         const fakeCustomerId = '92929292'
         return pactum
           .spec()
-          .get(`/balance/${fakeCustomerId}/wallet/${validWalletId}`)
+          .get(`/wallet/balance/${fakeCustomerId}/wallet/${validWalletId}`)
           .expectStatus(403)
       })
 
       it('should retrieve customer wallet balance', () => {
         return pactum
           .spec()
-          .get(`/balance/${validCustomerId}/wallet/${validWalletId}`)
+          .get(`/wallet/balance/${validCustomerId}/wallet/${validWalletId}`)
           .expectStatus(200)
       })
     })
 
+    describe('Wallet Deposit', () => {
+
+      it.todo('should deposit fund via debit card in wallet')
+
+      it.todo('should deposit fund via intra-bank transfer in wallet')
+
+      it.todo('should withdraw fund via inter-bank transfer on wallet')
+
+      it.todo('should withdraw fund via inter-bank transfer on wallet')
+
+    })
   })
 
 })
